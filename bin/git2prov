@@ -3,21 +3,91 @@ var path = require('path'),
     os = require('os'),
     convert = require("../lib/git2provConverter").convert;
 
-// Parse arguments
-var args = process.argv.slice(2);
-if (args.length < 1 || args.length > 2) {
-  console.error('usage: git2prov git_url [{PROV-JSON,PROV-O,PROV-XML,SVG}]');
-  return process.exit(1);
+defaults = {
+    serialization: 'PROV-O',
+    requestUrl: 'http://localhost'
 }
-var gitUrl = args[0],
-    serialization = args[1] || 'PROV-JSON',
+
+function showUsage() {
+    console.error('usage: git2prov [options] git_url');
+    console.error('options:');
+    console.error('-h | -help | --help         : print this and exit');
+    console.error('-s | --serialization        : Serialization mode: PROV-JSON,PROV-O,PROV-XML,SVG');
+    console.error('                              Default: ' + defaults.serialization);
+    console.error('-r | --request-url          : Request URL used as prefix');
+    console.error('                              Default: ' + defaults.requestUrl);
+    console.error('--                          : end of options');
+}
+
+var serialization = defaults.serialization;
+var requestUrl = defaults.requestUrl;
+
+// Parse arguments
+var argv = process.argv.slice(2);
+var numArgs = argv.length;
+var i;
+for (i = 0; i < numArgs; ++i) {
+    var arg = argv[i];
+    if (arg.length > 0 && arg[0] === '-') {
+        if (arg === "-help" || arg === "--help" || arg === "-h") {
+            showUsage();
+            return process.exit(0);
+        }
+        else if (arg === "-s" || arg === "--serialization") {
+            if (++i < numArgs) {
+                var s = argv[i];
+                if (s !== "PROV-JSON" && s !== "PROV-O" && s != "PROV-XML" && s !== "SVG") {
+                    console.error('Unsupported serialization mode: '+s);
+                    return process.exit(1);
+                }
+                serialization = s;
+            }
+            else {
+                console.error(arg + " option require argument");
+                return process.exit(1);
+            }
+        }
+        else if (arg === "-r" || arg === "--request-url") {
+            if (++i < numArgs) {
+                requestUrl = argv[i];
+            }
+            else {
+                console.error(arg + " option require argument");
+                return process.exit(1);
+            }
+        }
+        else if (arg === "--") {
+            // end of options
+            i++;
+            break;
+        }
+        else {
+            console.error("Unknown option: " + arg);
+            console.error("");
+            showUsage();
+            return process.exit(1);
+        }
+    }
+    else {
+        // no '-' prefix
+        break;
+    }
+}
+
+if (i >= numArgs) {
+    console.error('Git URL missing');
+    console.error('');
+    showUsage();
+    return process.exit(1);
+}
+
+var gitUrl = argv[i],
     tempDir = path.join(os.tmpdir(), 'git2prov', process.pid.toString()),
-    requestUrl = 'http://localhost/',
     options = {};
 
 // Output the provenance
 convert(gitUrl, serialization, tempDir, requestUrl, options, function (prov, error) {
-  if (error)
-    throw error;
-  console.log(prov);
+    if (error)
+        throw error;
+    console.log(prov);
 });
