@@ -583,9 +583,9 @@ describe('Unit', function(){
       it("process file into correct log command list", function(){
 
           assert.deepEqual(log_cmds,[
-              "git --no-pager log --date=iso --name-status --pretty=format:\"README-md,%H,%P,%an,%ad,%cn,%cd,%s,&\" -- README.md",
-              "git --no-pager log --date=iso --name-status --pretty=format:\"git2provConverter-js,%H,%P,%an,%ad,%cn,%cd,%s,&\" -- git2provConverter.js",
-              "git --no-pager log --date=iso --name-status --pretty=format:\"index-js,%H,%P,%an,%ad,%cn,%cd,%s,&\" -- index.js"
+              "git --no-pager log --date=iso --name-status --pretty=format:\"README-md,%H,%P,%an,%ae,%ad,%cn,%ce,%cd,%s,&\" -- README.md",
+              "git --no-pager log --date=iso --name-status --pretty=format:\"git2provConverter-js,%H,%P,%an,%ae,%ad,%cn,%ce,%cd,%s,&\" -- git2provConverter.js",
+              "git --no-pager log --date=iso --name-status --pretty=format:\"index-js,%H,%P,%an,%ae,%ad,%cn,%ce,%cd,%s,&\" -- index.js"
           ]);
 
       } );
